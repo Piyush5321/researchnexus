@@ -6,10 +6,14 @@
     },
     "backend": {
       "root": "backend",
-      "entrypoint": "app/main.py"
+      "entrypoint": "main.py"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
     {
       "source": "/api(/.*)?",
       "destination": {

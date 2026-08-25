@@ -1,10 +1,16 @@
 """Knowledge Graph query builder and Cytoscape serialization service."""
 
 from typing import Any, Dict, List, Optional
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.models import Department, KnowledgeEdge, KnowledgeNode, Paper
+try:
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from backend.app.db.models import Department, KnowledgeEdge, KnowledgeNode, Paper
+    HAS_SQLALCHEMY = True
+except ImportError:
+    HAS_SQLALCHEMY = False
+    AsyncSession = Any  # type: ignore
+
 from backend.app.schemas.graph import (
     EdgeData,
     GraphEdge,
@@ -19,9 +25,11 @@ class KnowledgeGraphService:
     """Builds and serializes knowledge graphs for Cytoscape WebGL rendering."""
 
     async def get_filtered_graph(
-        self, db: AsyncSession, filters: GraphFilterRequest
+        self, db: Optional[AsyncSession], filters: GraphFilterRequest
     ) -> GraphResponse:
         """Retrieves and filters knowledge graph nodes and edges based on department and entity type."""
+        if not HAS_SQLALCHEMY or db is None:
+            return self._get_fallback_graph(filters)
         # Query nodes
         query = select(KnowledgeNode)
         if filters.selectedDepts:

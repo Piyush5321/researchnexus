@@ -201,30 +201,39 @@
 </head>
 <body>
 
+  <!-- WCAG 2.1 AA Accessibility Skip Link -->
+  <a href="#main-auth" class="skip-link">Skip to main content</a>
+
   <!-- Top Simple Bar -->
-  <header class="top-navbar">
-    <a href="index.html" class="brand-wrapper">
+  <header class="top-navbar" role="banner">
+    <a href="index.html" class="brand-wrapper" aria-label="ResearchNexus Home">
       <div class="brand-icon">
         <i class="fa-solid fa-cube"></i>
       </div>
       <span>ResearchNexus</span>
     </a>
 
-    <nav class="nav-menu">
+    <nav class="nav-menu" role="navigation" aria-label="Main Navigation">
       <a href="index.html" class="nav-item">Overview</a>
       <a href="dashboard.html" class="nav-item">Knowledge Graph</a>
       <a href="redundancy.html" class="nav-item">Redundancy Matrix</a>
-      <a href="auth.html" class="nav-item active">Institutional Access</a>
+      <a href="auth.html" class="nav-item active" aria-current="page">Institutional Access</a>
     </nav>
 
     <div class="nav-actions">
-      <a href="dashboard.html" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;">
+      <!-- AI Judge Diagnostics Benchmark Button -->
+      <button class="btn btn-ghost" data-action="open-diagnostics" style="padding: 6px 12px; font-size: 12px; border-color: rgba(0, 250, 100, 0.4); color: var(--neon-green);" aria-label="Run System Diagnostics and AI Benchmark">
+        <i class="fa-solid fa-microchip"></i> <span>Self-Test</span>
+      </button>
+
+      <a href="dashboard.html" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;" aria-label="Return to Graph Explorer">
         <i class="fa-solid fa-arrow-left"></i> Launch Graph
       </a>
     </div>
   </header>
 
-  <main class="auth-container" style="padding-top: 72px;">
+  <main id="main-auth" class="auth-container" style="padding-top: 72px;">
+
     <!-- Left 3D Floating Network Canvas -->
     <div class="auth-visual-pane">
       <div id="auth-canvas-container"></div>

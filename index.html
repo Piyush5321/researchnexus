@@ -135,17 +135,20 @@
 </head>
 <body>
 
+  <!-- WCAG 2.1 AA Accessibility Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Top Navigation Bar -->
-  <header class="top-navbar">
-    <a href="index.html" class="brand-wrapper">
+  <header class="top-navbar" role="banner">
+    <a href="index.html" class="brand-wrapper" aria-label="ResearchNexus Home">
       <div class="brand-icon">
         <i class="fa-solid fa-cube"></i>
       </div>
       <span>ResearchNexus</span>
     </a>
 
-    <nav class="nav-menu">
-      <a href="index.html" class="nav-item active">Overview</a>
+    <nav class="nav-menu" role="navigation" aria-label="Main Navigation">
+      <a href="index.html" class="nav-item active" aria-current="page">Overview</a>
       <a href="dashboard.html" class="nav-item">Knowledge Graph</a>
       <a href="redundancy.html" class="nav-item">Redundancy Matrix</a>
       <a href="auth.html" class="nav-item">Institutional Access</a>
@@ -153,24 +156,31 @@
 
     <div class="nav-actions">
       <!-- Global Search -->
-      <div class="search-container">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="global-search-input" class="search-input" placeholder="Search papers, code, equations..." />
-        <div id="global-search-dropdown" class="search-dropdown"></div>
+      <div class="search-container" role="search">
+        <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+        <input type="text" id="global-search-input" class="search-input" placeholder="Search papers, code, equations..." aria-label="Global Research and Equation Search" />
+        <div id="global-search-dropdown" class="search-dropdown" role="listbox" aria-label="Search results"></div>
       </div>
 
-      <button id="btnNavUpload" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);">
-        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper / PDF</span>
+      <!-- AI Judge Diagnostics Benchmark Button -->
+      <button class="btn btn-ghost" data-action="open-diagnostics" style="padding: 8px 14px; font-size: 12px; border-color: rgba(0, 250, 100, 0.4); color: var(--neon-green);" aria-label="Run System Diagnostics and AI Benchmark">
+        <i class="fa-solid fa-microchip"></i> <span>Self-Test</span>
       </button>
 
-      <a href="dashboard.html" class="btn btn-ghost" style="padding: 8px 16px; font-size: 12px;">
+      <button id="btnNavUpload" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);" aria-label="Upload Research Paper or PDF">
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper</span>
+      </button>
+
+      <a href="dashboard.html" class="btn btn-ghost" style="padding: 8px 16px; font-size: 12px;" aria-label="Open Knowledge Graph Explorer">
         <i class="fa-solid fa-network-wired"></i> Graph Explorer
       </a>
     </div>
   </header>
 
   <!-- Main Hero Section with WebGL Canvas Particle Simulation -->
-  <section class="hero-section">
+  <main id="main-content">
+  <section class="hero-section" aria-label="Platform Hero Overview">
+
     <canvas id="hero-particle-canvas" class="hero-canvas-bg"></canvas>
     
     <div class="hero-content">
@@ -727,7 +737,10 @@
     </div>
   </div>
 
+  </main>
+
   <!-- Floating Action Button for Instant Upload -->
+
   <button id="fabUpload" class="fab-upload-btn" title="Upload Research Paper / PDF">
     <i class="fa-solid fa-cloud-arrow-up" style="font-size: 16px; color: var(--neon-cyan);"></i>
     <span>Upload PDF / Paper</span>

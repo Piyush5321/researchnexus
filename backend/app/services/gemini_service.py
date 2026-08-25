@@ -8,33 +8,45 @@ import json
 import logging
 import math
 from typing import Any, Dict, List, Optional
-from google import genai
-from google.genai import types
 
 from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Optional Google GenAI SDK
+try:
+    from google import genai
+    from google.genai import types
+    HAS_GENAI = True
+except ImportError:
+    genai = None  # type: ignore
+    types = None  # type: ignore
+    HAS_GENAI = False
 
 
 class GeminiAIService:
     """Encapsulates all Google GenAI model interactions for ResearchNexus."""
 
     def __init__(self):
-        self._client: Optional[genai.Client] = None
+        self._client: Optional[Any] = None
 
     @property
-    def client(self) -> genai.Client:
+    def client(self) -> Optional[Any]:
         """Lazy initialization of Google GenAI client."""
-        if self._client is None:
+        if self._client is None and HAS_GENAI:
             api_key = settings.GEMINI_API_KEY
             if not api_key:
                 logger.warning(
                     "[GeminiService] GEMINI_API_KEY is not set. Using mock fallbacks for AI operations."
                 )
-            self._client = genai.Client(
-                api_key=api_key or "DUMMY_KEY_FOR_MOCK",
-                http_options={"headers": {"User-Agent": "aistudio-build"}}
-            )
+            try:
+                self._client = genai.Client(
+                    api_key=api_key or "DUMMY_KEY_FOR_MOCK",
+                    http_options={"headers": {"User-Agent": "aistudio-build"}}
+                )
+            except Exception as exc:
+                logger.warning(f"[GeminiService] Could not initialize genai client: {exc}")
+                self._client = None
         return self._client
 
     async def generate_embedding(self, text: str) -> List[float]:
@@ -45,7 +57,7 @@ class GeminiAIService:
         if not text or not text.strip():
             return [0.0] * settings.VECTOR_DIMENSION
 
-        if settings.GEMINI_API_KEY:
+        if settings.GEMINI_API_KEY and self.client and HAS_GENAI:
             try:
                 response = self.client.models.embed_content(
                     model=settings.GEMINI_EMBEDDING_MODEL,
@@ -66,7 +78,7 @@ class GeminiAIService:
         self, title: str, text: str
     ) -> Dict[str, Any]:
         """Analyzes research paper content, classifies genre, and extracts core mathematical kernels."""
-        if settings.GEMINI_API_KEY:
+        if settings.GEMINI_API_KEY and self.client and HAS_GENAI:
             try:
                 prompt = f"""
 You are an expert Principal AI Researcher and Cross-Disciplinary Knowledge Graph Architect.
@@ -102,6 +114,7 @@ Respond ONLY in valid JSON matching this schema:
             except Exception as exc:
                 logger.error(f"[GeminiService] Classification failed: {exc}")
 
+
         # Deterministic domain heuristics fallback
         lower = f"{title} {text}".lower()
         if "hemodynamic" in lower or "arter" in lower or "bio" in lower:
@@ -135,7 +148,7 @@ Respond ONLY in valid JSON matching this schema:
 
     async def extract_triplets(self, text: str) -> List[Dict[str, str]]:
         """Extracts knowledge graph triplets (subject, relation, object) from unstructured research text."""
-        if settings.GEMINI_API_KEY:
+        if settings.GEMINI_API_KEY and self.client and HAS_GENAI:
             try:
                 prompt = f"""
 Extract key scientific and algorithmic relationship triplets from this research summary:

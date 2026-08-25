@@ -1,16 +1,23 @@
 """Redundancy Detection & Overlap Matrix calculation engine for ResearchNexus."""
 
-from typing import Any, Dict, List
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, Dict, List, Optional
 
-from backend.app.db.models import Department, RedundancyAlert
+try:
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from backend.app.db.models import Department, RedundancyAlert
+    HAS_SQLALCHEMY = True
+except ImportError:
+    HAS_SQLALCHEMY = False
+    AsyncSession = Any  # type: ignore
+
 from backend.app.schemas.redundancy import (
     ASTDiffPayload,
     MatrixCell,
     RedundancyAlertCard,
     RedundancyMatrixResponse,
 )
+
 
 
 class RedundancyEngineService:

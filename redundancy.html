@@ -56,9 +56,12 @@
 </head>
 <body>
 
+  <!-- WCAG 2.1 AA Accessibility Skip Link -->
+  <a href="#main-matrix" class="skip-link">Skip to main content</a>
+
   <!-- Top Navigation Bar -->
-  <header class="top-navbar">
-    <a href="index.html" class="brand-wrapper">
+  <header class="top-navbar" role="banner">
+    <a href="index.html" class="brand-wrapper" aria-label="ResearchNexus Home">
       <div class="brand-icon">
         <i class="fa-solid fa-cube"></i>
       </div>
@@ -66,30 +69,36 @@
     </a>
 
     <!-- Global Search -->
-    <div class="search-container">
-      <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <input type="text" id="global-search-input" class="search-input" placeholder="Search redundant studies, labs, ASTs..." />
-      <div id="global-search-dropdown" class="search-dropdown"></div>
+    <div class="search-container" role="search">
+      <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+      <input type="text" id="global-search-input" class="search-input" placeholder="Search redundant studies, labs, ASTs..." aria-label="Search redundant research" />
+      <div id="global-search-dropdown" class="search-dropdown" role="listbox" aria-label="Search results"></div>
     </div>
 
-    <nav class="nav-menu">
+    <nav class="nav-menu" role="navigation" aria-label="Main Navigation">
       <a href="dashboard.html" class="nav-item">Knowledge Graph</a>
-      <a href="redundancy.html" class="nav-item active">Redundancy Matrix</a>
+      <a href="redundancy.html" class="nav-item active" aria-current="page">Redundancy Matrix</a>
       <a href="auth.html" class="nav-item">Access</a>
     </nav>
 
     <div class="nav-actions">
-      <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);">
-        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper / PDF</span>
+      <!-- AI Judge Diagnostics Benchmark Button -->
+      <button class="btn btn-ghost" data-action="open-diagnostics" style="padding: 7px 14px; font-size: 12px; border-color: rgba(0, 250, 100, 0.4); color: var(--neon-green);" aria-label="Run System Diagnostics and AI Benchmark">
+        <i class="fa-solid fa-microchip"></i> <span>Self-Test</span>
       </button>
 
-      <button class="btn btn-ghost" style="padding: 7px 16px; font-size: 12px;" onclick="window.showToast('Generating campus-wide grant audit report PDF...', 'cyan')">
+      <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);" aria-label="Upload Research Paper">
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper</span>
+      </button>
+
+      <button class="btn btn-ghost" style="padding: 7px 16px; font-size: 12px;" onclick="window.showToast('Generating campus-wide grant audit report PDF...', 'cyan')" aria-label="Export Audit Report PDF">
         <i class="fa-solid fa-file-pdf"></i> Export Audit Report
       </button>
     </div>
   </header>
 
-  <main class="matrix-layout">
+  <main id="main-matrix" class="matrix-layout">
+
     <!-- Header Banner -->
     <div class="glass-panel" style="padding: 24px; margin-bottom: 28px; border-left: 4px solid var(--neon-cyan); position: relative; overflow: hidden;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; z-index: 10;">

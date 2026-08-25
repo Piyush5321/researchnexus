@@ -160,55 +160,60 @@
 </head>
 <body>
 
+  <!-- WCAG 2.1 AA Accessibility Skip Link -->
+  <a href="#main-dashboard" class="skip-link">Skip to main content</a>
+
   <!-- Top Navigation Bar -->
-  <header class="top-navbar">
+  <header class="top-navbar" role="banner">
     <div style="display: flex; align-items: center; gap: 14px;">
-      <a href="index.html" class="brand-wrapper">
+      <a href="index.html" class="brand-wrapper" aria-label="ResearchNexus Home">
         <div class="brand-icon">
           <i class="fa-solid fa-cube"></i>
         </div>
         <span>ResearchNexus</span>
       </a>
 
-      <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);">
-        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper / PDF</span>
+      <!-- AI Judge Diagnostics Benchmark Button -->
+      <button class="btn btn-ghost" data-action="open-diagnostics" style="padding: 6px 12px; font-size: 12px; border-color: rgba(0, 250, 100, 0.4); color: var(--neon-green);" aria-label="Run System Diagnostics and AI Benchmark">
+        <i class="fa-solid fa-microchip"></i> <span>Self-Test</span>
       </button>
 
-      <button id="btnOpenMatcher" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;">
+      <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);" aria-label="Upload Research Paper">
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper</span>
+      </button>
+
+      <button id="btnOpenMatcher" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;" aria-label="Open Document Matcher">
         <i class="fa-solid fa-file-magnifying-glass"></i> Matcher
       </button>
-
-      <span class="badge badge-cyan" style="font-size: 10px;">
-        <i class="fa-solid fa-microchip"></i> Engine Active: Bio &bull; Mech &bull; CS
-      </span>
     </div>
 
     <!-- Global Search -->
-    <div class="search-container">
-      <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <input type="text" id="global-search-input" class="search-input" placeholder="Semantic Graph Entity Search..." />
-      <div id="global-search-dropdown" class="search-dropdown"></div>
+    <div class="search-container" role="search">
+      <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+      <input type="text" id="global-search-input" class="search-input" placeholder="Semantic Graph Entity Search..." aria-label="Search Graph Nodes and Entities" />
+      <div id="global-search-dropdown" class="search-dropdown" role="listbox" aria-label="Search results"></div>
     </div>
 
-    <nav class="nav-menu">
-      <a href="dashboard.html" class="nav-item active">Knowledge Graph</a>
+    <nav class="nav-menu" role="navigation" aria-label="Main Navigation">
+      <a href="dashboard.html" class="nav-item active" aria-current="page">Knowledge Graph</a>
       <a href="redundancy.html" class="nav-item">Redundancy Matrix</a>
       <a href="auth.html" class="nav-item">Access</a>
     </nav>
 
     <div class="nav-actions">
-      <button class="nav-icon-btn" onclick="window.showToast('14 duplicate methodology flags active across 4 faculties', 'warning')">
+      <button class="nav-icon-btn" onclick="window.showToast('14 duplicate methodology flags active across 4 faculties', 'warning')" aria-label="View Active Redundancy Alerts">
         <i class="fa-regular fa-bell"></i>
         <div class="notification-dot"></div>
       </button>
 
-      <a href="auth.html" class="nav-icon-btn" style="overflow: hidden; border-color: var(--border-cyan);">
+      <a href="auth.html" class="nav-icon-btn" style="overflow: hidden; border-color: var(--border-cyan);" aria-label="User Profile">
         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
       </a>
     </div>
   </header>
 
-  <div class="dashboard-layout">
+  <main id="main-dashboard" class="dashboard-layout">
+
     <!-- Left Floating Control Drawer -->
     <aside class="filter-drawer">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -392,7 +397,8 @@
         </button>
       </div>
     </aside>
-  </div>
+  </main>
+
 
   <!-- Live Ingestion Scanner Modal -->
   <div id="new-analysis-modal" class="modal-backdrop">

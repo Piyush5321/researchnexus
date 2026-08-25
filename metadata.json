@@ -1,0 +1,6 @@
+{
+  "name": "ResearchNexus",
+  "description": "Automated Cross-Disciplinary Knowledge Graph & Research Redundancy Engine for Universities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

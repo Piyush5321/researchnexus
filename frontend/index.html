@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResearchNexus - Automated University Knowledge Graph & Redundancy Engine</title>
+  <meta name="description" content="Cross-disciplinary knowledge graph and research redundancy engine for universities. Unsilo institutional research and detect duplicated studies." />
+
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- CSS Modular Styles -->
+  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/animations.css" />
+
+  <style>
+    .hero-section {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      overflow: hidden;
+    }
+
+    .hero-canvas-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .hero-headline {
+      font-size: clamp(36px, 6vw, 68px);
+      line-height: 1.1;
+      margin-bottom: 24px;
+      text-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
+    }
+
+    .hero-gradient-text {
+      background: linear-gradient(135deg, #00F0FF 20%, #8A2BE2 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    .hero-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    #silo-problem-section {
+      position: relative;
+      min-height: 100vh;
+      padding: 100px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(14, 21, 36, 0.9), var(--bg-midnight-deep));
+      overflow: hidden;
+    }
+
+    .silo-split-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+      max-width: 1100px;
+      margin: 40px auto 0;
+      position: relative;
+    }
+
+    .silo-connector-beam {
+      width: 120px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--neon-violet), var(--neon-cyan));
+      box-shadow: 0 0 15px var(--neon-cyan);
+      transform-origin: left center;
+      position: relative;
+    }
+
+    .silo-match-badge {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+      .silo-split-container {
+        grid-template-columns: 1fr;
+      }
+      .silo-connector-beam {
+        width: 3px;
+        height: 60px;
+        margin: 0 auto;
+        transform-origin: top center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <a href="index.html" class="brand-wrapper">
+      <div class="brand-icon">
+        <i class="fa-solid fa-cube"></i>
+      </div>
+      <span>ResearchNexus</span>
+    </a>
+
+    <nav class="nav-menu">
+      <a href="index.html" class="nav-item active">Overview</a>
+      <a href="dashboard.html" class="nav-item">Knowledge Graph</a>
+      <a href="redundancy.html" class="nav-item">Redundancy Matrix</a>
+      <a href="auth.html" class="nav-item">Institutional Access</a>
+    </nav>
+
+    <div class="nav-actions">
+      <!-- Global Search -->
+      <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="global-search-input" class="search-input" placeholder="Search papers, code, equations..." />
+        <div id="global-search-dropdown" class="search-dropdown"></div>
+      </div>
+
+      <a href="dashboard.html" class="btn btn-primary" style="padding: 8px 18px; font-size: 12px;">
+        <i class="fa-solid fa-network-wired"></i> Launch Explorer
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Hero Section with WebGL Canvas Particle Simulation -->
+  <section class="hero-section">
+    <canvas id="hero-particle-canvas" class="hero-canvas-bg"></canvas>
+    
+    <div class="hero-content">
+      <div class="hero-badge" style="margin-bottom: 20px;">
+        <span class="badge badge-cyan">
+          <i class="fa-solid fa-shield-halved"></i> Institutional Redundancy Intelligence v2.4
+        </span>
+      </div>
+
+      <h1 class="hero-headline">
+        Unsilo University Knowledge.<br />
+        <span class="hero-gradient-text">Discover Hidden Breakthroughs.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        An automated AI knowledge graph engine that ingests papers, code repositories, and lab datasets across departments to eliminate duplicate studies and spark cross-disciplinary grant synergy.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="dashboard.html" class="btn btn-primary">
+          <i class="fa-solid fa-diagram-project"></i> Explore Knowledge Graph
+        </a>
+        <a href="redundancy.html" class="btn btn-ghost">
+          <i class="fa-solid fa-table-cells"></i> View Redundancy Matrix
+        </a>
+        <button class="btn btn-ghost" onclick="window.openASTComparison('ALERT-NAV-89')">
+          <i class="fa-solid fa-play"></i> Watch System Demo
+        </button>
+      </div>
+
+      <!-- Live Stats Ticker Cards -->
+      <div class="hero-stats-grid">
+        <div class="glass-card hero-stat-card" style="padding: 18px; text-align: center;">
+          <div class="font-mono" style="font-size: 28px; font-weight: 700; color: var(--neon-cyan);" data-counter-target="54190">54,190</div>
+          <div class="font-mono" style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px;">Papers & Repos Indexed</div>
+        </div>
+
+        <div class="glass-card hero-stat-card" style="padding: 18px; text-align: center;">
+          <div class="font-mono" style="font-size: 28px; font-weight: 700; color: var(--neon-violet-light);" data-counter-target="12">12</div>
+          <div class="font-mono" style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px;">Faculties Synchronized</div>
+        </div>
+
+        <div class="glass-card hero-stat-card" style="padding: 18px; text-align: center;">
+          <div class="font-mono" style="font-size: 28px; font-weight: 700; color: var(--alert-amber);" data-counter-target="348">348</div>
+          <div class="font-mono" style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px;">Redundancies Detected</div>
+        </div>
+
+        <div class="glass-card hero-stat-card" style="padding: 18px; text-align: center;">
+          <div class="font-mono" style="font-size: 28px; font-weight: 700; color: var(--neon-green);" data-counter-target="4.2" data-counter-prefix="$" data-counter-suffix="M">$4.2M</div>
+          <div class="font-mono" style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px;">Grant Waste Prevented</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pinned ScrollTrigger Parallax Section: The Silo Problem -->
+  <section id="silo-problem-section">
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 20px;" class="silo-intro">
+      <span class="badge badge-red" style="margin-bottom: 12px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> The Academic Silo Problem
+      </span>
+      <h2 style="font-size: clamp(28px, 4vw, 42px); margin-bottom: 14px;">
+        Unknowingly Solving the Exact Same Equations
+      </h2>
+      <p style="color: var(--text-muted); font-size: 15px;">
+        Universities spend millions funding identical numerical solvers in disconnected departments. ResearchNexus parses mathematical AST trees to detect algorithmic duplication across isolated labs.
+      </p>
+    </div>
+
+    <div class="silo-split-container">
+      <!-- Biomedical Silo Card -->
+      <div class="glass-card silo-card-bio" style="padding: 24px; border-left: 3px solid var(--dept-bio); transform: translateX(-40px); opacity: 0.2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span class="badge badge-violet"><i class="fa-solid fa-dna"></i> Biomedical Eng</span>
+          <span class="font-mono" style="font-size: 11px; color: var(--text-dim);">Lab ID: BIO-401</span>
+        </div>
+        <h3 style="font-size: 17px; margin-bottom: 8px;">Stenotic Hemodynamics in Arteries</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+          Solving 3D incompressible Navier-Stokes with Casson non-Newtonian viscosity model in coronary bifurcations.
+        </p>
+        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; color: #cffafe;">
+          <code>tau = (sqrt(tau_0) + sqrt(mu_inf * gamma))**2</code>
+        </div>
+      </div>
+
+      <!-- Connecting Bridge Beam -->
+      <div class="silo-connector-beam" style="transform: scaleX(0.2); opacity: 0.3;">
+        <span class="badge badge-cyan silo-match-badge" style="transform: translateX(-50%) scale(0.6); opacity: 0.3;">
+          <i class="fa-solid fa-bolt"></i> 92% AST Math Match
+        </span>
+      </div>
+
+      <!-- Mechanical Eng Silo Card -->
+      <div class="glass-card silo-card-mech" style="padding: 24px; border-left: 3px solid var(--dept-mech); transform: translateX(40px); opacity: 0.2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span class="badge badge-amber"><i class="fa-solid fa-cogs"></i> Mechanical Eng</span>
+          <span class="font-mono" style="font-size: 11px; color: var(--text-dim);">Lab ID: MECH-892</span>
+        </div>
+        <h3 style="font-size: 17px; margin-bottom: 8px;">Polymer Coolant Flow in Injectors</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+          Solving high-shear Navier-Stokes equations with identical yield-stress shear-thinning mathematical models.
+        </p>
+        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; color: #cffafe;">
+          <code>stress = (sqrt(yield) + sqrt(mu_base * shear))**2</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="silo-breakthrough-note" style="text-align: center; margin-top: 36px; opacity: 0; transform: translateY(20px);">
+      <button class="btn btn-primary" onclick="window.openASTComparison('ALERT-NAV-89')">
+        <i class="fa-solid fa-code-compare"></i> Compare Navier-Stokes AST Code Side-by-Side
+      </button>
+    </div>
+  </section>
+
+  <!-- Pipeline Overview Section -->
+  <section class="pipeline-overview-section" style="padding: 100px 32px; max-width: 1200px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 54px;">
+      <span class="badge badge-cyan" style="margin-bottom: 10px;">Three-Stage Engine</span>
+      <h2 style="font-size: clamp(28px, 4vw, 38px); margin-bottom: 12px;">How ResearchNexus Ingests & Audits</h2>
+      <p style="color: var(--text-muted); font-size: 15px; max-width: 650px; margin: 0 auto;">
+        From PDF extraction and AST compiler parsing to sub-millisecond vector graph indexing.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+      <!-- Step 1 -->
+      <div class="glass-card pipeline-step-card" style="padding: 32px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -10px; right: -10px; font-size: 72px; font-weight: 800; color: rgba(255,255,255,0.02); font-family: var(--font-mono);">01</div>
+        <div style="width: 50px; height: 50px; border-radius: 10px; background: rgba(0, 240, 255, 0.12); border: 1px solid var(--border-cyan); display: flex; align-items: center; justify-content: center; color: var(--neon-cyan); font-size: 22px; margin-bottom: 20px;">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 10px;">1. Multi-Modal Ingestion</h3>
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
+          Continuous webhook watchers crawl campus preprint servers, GitHub/GitLab repositories, LaTeX thesis dumps, and laboratory tabular datasets.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="glass-card pipeline-step-card" style="padding: 32px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -10px; right: -10px; font-size: 72px; font-weight: 800; color: rgba(255,255,255,0.02); font-family: var(--font-mono);">02</div>
+        <div style="width: 50px; height: 50px; border-radius: 10px; background: rgba(138, 43, 226, 0.15); border: 1px solid var(--border-violet); display: flex; align-items: center; justify-content: center; color: var(--neon-violet-light); font-size: 22px; margin-bottom: 20px;">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 10px;">2. AI Triplet Extraction</h3>
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
+          Deep language models decompose complex studies into knowledge triplets <code>(Subject &rarr; Methodology &rarr; Target)</code> and Abstract Syntax Trees for code.
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="glass-card pipeline-step-card" style="padding: 32px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -10px; right: -10px; font-size: 72px; font-weight: 800; color: rgba(255,255,255,0.02); font-family: var(--font-mono);">03</div>
+        <div style="width: 50px; height: 50px; border-radius: 10px; background: rgba(0, 250, 100, 0.12); border: 1px solid var(--neon-green); display: flex; align-items: center; justify-content: center; color: var(--neon-green); font-size: 22px; margin-bottom: 20px;">
+          <i class="fa-solid fa-bolt-lightning"></i>
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 10px;">3. AlloyDB Hybrid Search</h3>
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
+          Combines dense HNSW vector similarity with exact graph-walk traversals to flag duplicate formulations across departments in sub-10ms queries.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AST Code Comparison Modal -->
+  <div id="ast-comparison-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-solid fa-code-compare" style="color: var(--neon-cyan); font-size: 18px;"></i>
+          <h3 id="ast-modal-title" style="font-size: 18px;">AST Comparison Inspector</h3>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="ast-modal-similarity" class="badge badge-cyan">92% Match</span>
+          <button data-close-modal class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Compiler AST de-anonymizer compares computational logic and mathematical tensors despite variable renaming:
+        </p>
+        <div class="ast-diff-grid">
+          <div class="ast-pane">
+            <div id="ast-pane-a-title" class="ast-pane-header">Department A Formulation</div>
+            <div id="ast-pane-a-code"></div>
+          </div>
+          <div class="ast-pane">
+            <div id="ast-pane-b-title" class="ast-pane-header">Department B Formulation</div>
+            <div id="ast-pane-b-code"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button data-close-modal class="btn btn-ghost">Dismiss</button>
+        <button class="btn btn-primary" onclick="window.openConnectModal('ALERT-NAV-89'); document.getElementById('ast-comparison-modal').classList.remove('active');">
+          <i class="fa-solid fa-user-group"></i> Connect Faculty Chairs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connect Researchers Modal -->
+  <div id="connect-researchers-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 620px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-handshake-angle" style="color: var(--neon-green); font-size: 18px;"></i>
+          <h3 style="font-size: 18px;">Cross-Department Synergy Briefing</h3>
+        </div>
+        <button data-close-modal class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono);">Faculty A</div>
+            <div id="connect-author-a" style="font-weight: 600; font-size: 13px; color: var(--neon-cyan);">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono);">Faculty B</div>
+            <div id="connect-author-b" style="font-weight: 600; font-size: 13px; color: var(--neon-violet-light);">--</div>
+          </div>
+        </div>
+
+        <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; font-family: var(--font-mono);">Automated Collaboration Proposal Draft</label>
+        <textarea id="connect-proposal-text" class="input-glass font-mono" rows="7" style="font-size: 12px; line-height: 1.6;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button data-close-modal class="btn btn-ghost">Cancel</button>
+        <button id="btn-send-invitation" class="btn btn-primary">
+          <i class="fa-solid fa-paper-plane"></i> Dispatch Institutional Invitation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-glass); padding: 48px 32px; background: var(--bg-midnight-deep); margin-top: 60px;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 20px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="brand-icon" style="width: 28px; height: 28px; font-size: 14px;"><i class="fa-solid fa-cube"></i></div>
+        <span style="font-weight: 700; font-size: 14px; color: var(--text-main);">ResearchNexus AI</span>
+        <span style="color: var(--text-dim); font-size: 12px; font-family: var(--font-mono);">© 2026 Institutional Knowledge Graph Engine</span>
+      </div>
+      <div style="display: flex; gap: 24px; font-size: 13px; color: var(--text-muted);">
+        <a href="dashboard.html">Explorer</a>
+        <a href="redundancy.html">Redundancy Matrix</a>
+        <a href="auth.html">SSO Access</a>
+        <a href="#" onclick="window.showToast('FastAPI REST docs ready at /docs', 'cyan')">API Docs</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Third Party CDNs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+
+  <!-- Modular Application Scripts -->
+  <script type="module" src="./js/mockData.js"></script>
+  <script type="module" src="./js/animations.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

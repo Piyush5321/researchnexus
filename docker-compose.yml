@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Database with pgvector support
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: research_nexus_db
+    environment:
+      POSTGRES_USER: nexus_admin
+      POSTGRES_PASSWORD: NexusSecurePass2026!
+      POSTGRES_DB: research_nexus
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/app/db/migrations/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus_admin -d research_nexus"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ResearchNexus FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: research_nexus_api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+asyncpg://nexus_admin:NexusSecurePass2026!@db:5432/research_nexus
+      - SYNC_DATABASE_URL=postgresql://nexus_admin:NexusSecurePass2026!@db:5432/research_nexus
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

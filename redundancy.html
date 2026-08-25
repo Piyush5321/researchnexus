@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResearchNexus - Redundancy & Collaboration Matrix</title>
+  <meta name="description" content="Cross-departmental research redundancy matrix and duplicate study detection heatmap for university faculties." />
+
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Modular Styles -->
+  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/animations.css" />
+
+  <style>
+    .matrix-layout {
+      padding-top: 96px;
+      padding-bottom: 64px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+
+    .matrix-grid-section {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .heatmap-panel {
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    .legend-bar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    @media (max-width: 1100px) {
+      .matrix-grid-section {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <a href="index.html" class="brand-wrapper">
+      <div class="brand-icon">
+        <i class="fa-solid fa-cube"></i>
+      </div>
+      <span>ResearchNexus</span>
+    </a>
+
+    <!-- Global Search -->
+    <div class="search-container">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="global-search-input" class="search-input" placeholder="Search redundant studies, labs, ASTs..." />
+      <div id="global-search-dropdown" class="search-dropdown"></div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html" class="nav-item">Knowledge Graph</a>
+      <a href="redundancy.html" class="nav-item active">Redundancy Matrix</a>
+      <a href="auth.html" class="nav-item">Access</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);">
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Paper / PDF</span>
+      </button>
+
+      <button class="btn btn-ghost" style="padding: 7px 16px; font-size: 12px;" onclick="window.showToast('Generating campus-wide grant audit report PDF...', 'cyan')">
+        <i class="fa-solid fa-file-pdf"></i> Export Audit Report
+      </button>
+    </div>
+  </header>
+
+  <main class="matrix-layout">
+    <!-- Header Banner -->
+    <div class="glass-panel" style="padding: 24px; margin-bottom: 28px; border-left: 4px solid var(--neon-cyan); position: relative; overflow: hidden;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; z-index: 10;">
+        <div>
+          <span class="badge badge-cyan" style="margin-bottom: 8px;">
+            <i class="fa-solid fa-satellite-dish"></i> Real-Time Cross-Department Audit
+          </span>
+          <h1 style="font-size: clamp(22px, 3vw, 28px); margin-bottom: 6px;">
+            Discovered Inter-Department Opportunities & Duplicate Studies
+          </h1>
+          <p style="color: var(--text-muted); font-size: 13px; font-family: var(--font-mono);">
+            Matrix analysis generated at UTC <span id="audit-timestamp">04:22:19</span> &bull; 14 Active Duplicate Alerts &bull; 8 Shared Grant Opportunities
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+          <div class="glass-card" style="padding: 12px 18px; text-align: center; border-color: rgba(255, 51, 102, 0.4);">
+            <div class="font-mono" style="font-size: 22px; font-weight: 700; color: var(--alert-red);">14</div>
+            <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-dim); text-transform: uppercase;">Active Duplicate Flags</div>
+          </div>
+          <div class="glass-card" style="padding: 12px 18px; text-align: center; border-color: rgba(0, 240, 255, 0.4);">
+            <div class="font-mono" style="font-size: 22px; font-weight: 700; color: var(--neon-cyan);">$4.2M</div>
+            <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-dim); text-transform: uppercase;">Grant Waste Prevented</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dual Layout: Left Matrix Heatmap + Right Critical Insights Feed -->
+    <div class="matrix-grid-section">
+      
+      <!-- Left Heatmap Grid Container -->
+      <div class="glass-panel heatmap-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-table-cells" style="color: var(--neon-cyan);"></i>
+            <h2 style="font-size: 17px;">Faculty Overlap Heatmap</h2>
+          </div>
+          <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">Interactive Cell Tooltips Enabled</span>
+        </div>
+
+        <div id="matrix-heatmap-container">
+          <!-- Dynamically populated by app.js -->
+        </div>
+
+        <div class="legend-bar">
+          <span style="font-weight: 600; color: var(--text-muted);">SIMILARITY TIERS:</span>
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--neon-green);"></span> &lt; 20% (Low)
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--neon-cyan);"></span> 21% - 50% (Medium)
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--neon-violet-light);"></span> &gt; 50% (Critical Duplicate Risk)
+          </span>
+        </div>
+      </div>
+
+      <!-- Right Duplicate Study Alert Feed -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-list-check" style="color: var(--alert-amber);"></i>
+            <h2 style="font-size: 17px;">Critical Duplication Flags</h2>
+          </div>
+          <span class="badge badge-amber">3 High Priority</span>
+        </div>
+
+        <div id="redundancy-alerts-list" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Populated dynamically by app.js -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- AST Code Comparison Modal -->
+  <div id="ast-comparison-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-solid fa-code-compare" style="color: var(--neon-cyan); font-size: 18px;"></i>
+          <h3 id="ast-modal-title" style="font-size: 18px;">AST Comparison Inspector</h3>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="ast-modal-similarity" class="badge badge-cyan">92% Match</span>
+          <button data-close-modal class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="ast-diff-grid">
+          <div class="ast-pane">
+            <div id="ast-pane-a-title" class="ast-pane-header">Department A Formulation</div>
+            <div id="ast-pane-a-code"></div>
+          </div>
+          <div class="ast-pane">
+            <div id="ast-pane-b-title" class="ast-pane-header">Department B Formulation</div>
+            <div id="ast-pane-b-code"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button data-close-modal class="btn btn-ghost">Dismiss</button>
+        <button class="btn btn-primary" onclick="window.openConnectModal('ALERT-NAV-89'); document.getElementById('ast-comparison-modal').classList.remove('active');">
+          <i class="fa-solid fa-user-group"></i> Connect Faculty Chairs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connect Researchers Modal -->
+  <div id="connect-researchers-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 620px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-handshake-angle" style="color: var(--neon-green); font-size: 18px;"></i>
+          <h3 style="font-size: 18px;">Cross-Department Synergy Briefing</h3>
+        </div>
+        <button data-close-modal class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono);">Faculty A</div>
+            <div id="connect-author-a" style="font-weight: 600; font-size: 13px; color: var(--neon-cyan);">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono);">Faculty B</div>
+            <div id="connect-author-b" style="font-weight: 600; font-size: 13px; color: var(--neon-violet-light);">--</div>
+          </div>
+        </div>
+
+        <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; font-family: var(--font-mono);">Automated Collaboration Proposal Draft</label>
+        <textarea id="connect-proposal-text" class="input-glass font-mono" rows="7" style="font-size: 12px; line-height: 1.6;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button data-close-modal class="btn btn-ghost">Cancel</button>
+        <button id="btn-send-invitation" class="btn btn-primary">
+          <i class="fa-solid fa-paper-plane"></i> Dispatch Institutional Invitation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matcher & Topic Classification Modal -->
+  <div id="matcherModal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 780px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="brand-icon" style="width: 34px; height: 34px; font-size: 14px;">
+            <i class="fa-solid fa-file-waveform"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 17px; margin: 0;">AI Research Genre & Topic Matcher</h3>
+            <div style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">
+              Powered by Gemini 1.5 Pro & AlloyDB 768-d pgvector
+            </div>
+          </div>
+        </div>
+        <button id="btnCloseMatcher" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px;">
+        <form id="matcherForm">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div id="matcherDropZone" class="glass-card" style="border: 2px dashed rgba(0, 240, 255, 0.3); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--neon-cyan); margin-bottom: 10px;"></i>
+              <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px;">Drop Research PDF Here</div>
+              <div style="font-size: 11px; color: var(--text-dim);">or click to browse local filesystem</div>
+              <div id="matcherFileStatus" style="font-size: 11px; color: var(--neon-green); margin-top: 8px; font-family: var(--font-mono);"></div>
+              <input type="file" id="matcherFileInput" accept=".pdf,.tex,.txt,.py,.cpp,.cu" style="display: none;" />
+            </div>
+
+            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <label style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block; margin-bottom: 6px;">Target Department Scope</label>
+                <select id="matcherDeptSelect" class="input-glass" style="width: 100%; padding: 10px; margin-bottom: 12px; font-size: 13px;">
+                  <option value="all">Cross-Campus Search (All Faculties)</option>
+                  <option value="bio">Biomedical Engineering</option>
+                  <option value="mech">Mechanical Engineering</option>
+                  <option value="cs">Computer Science</option>
+                  <option value="physics">Applied Physics</option>
+                  <option value="chem">Chemistry & Nano</option>
+                  <option value="mat">Materials Science</option>
+                </select>
+              </div>
+
+              <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 13px;">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Extract Genre & Match Papers
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block; margin-bottom: 6px;">Or Paste Research Abstract / LaTeX Equations</label>
+            <textarea id="matcherTextInput" class="input-glass font-mono" rows="3" placeholder="e.g., We present a finite-volume numerical scheme solving Navier-Stokes equations with non-Newtonian Casson viscosity..." style="width: 100%; font-size: 12px;"></textarea>
+          </div>
+        </form>
+
+        <div id="matcherLoading" class="hidden" style="text-align: center; padding: 30px;">
+          <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: var(--neon-cyan); margin-bottom: 12px;"></i>
+          <h4 style="color: #fff; font-size: 15px; margin-bottom: 6px;">Analyzing Mathematical AST & Vector Embeddings...</h4>
+          <p style="font-size: 12px; color: var(--text-dim); font-family: var(--font-mono);">Classifying genre, isolating symbolic equations, and querying AlloyDB HNSW index</p>
+        </div>
+
+        <div id="matcherResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ingestion Pipeline Modal -->
+  <div id="ingestModal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-diagram-project" style="color: var(--neon-cyan); font-size: 18px;"></i>
+          <h3 style="font-size: 18px;">Multi-Stage Ingestion Pipeline</h3>
+        </div>
+        <button id="btnCloseIngest" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="ingestForm">
+          <div id="ingestDropZone" class="glass-card" style="border: 2px dashed rgba(0, 240, 255, 0.3); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; margin-bottom: 14px;">
+            <i class="fa-solid fa-file-pdf" style="font-size: 32px; color: var(--neon-cyan); margin-bottom: 8px;"></i>
+            <div style="font-size: 13px; font-weight: 600; color: #fff;">Upload Research PDF</div>
+            <div id="ingestFileStatus" style="font-size: 11px; color: var(--neon-green); margin-top: 6px; font-family: var(--font-mono);"></div>
+            <input type="file" id="ingestFileInput" accept=".pdf,.tex,.txt,.py" style="display: none;" />
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block; margin-bottom: 6px;">Git Code Repository URL (Optional)</label>
+            <input type="text" id="ingestRepoUrl" class="input-glass" placeholder="https://github.com/lab/repo.git" style="width: 100%; padding: 10px; font-size: 13px;" />
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block; margin-bottom: 6px;">Department Affiliation</label>
+            <select id="ingestDeptSelect" class="input-glass" style="width: 100%; padding: 10px; font-size: 13px;">
+              <option value="cs">Computer Science</option>
+              <option value="bio">Biomedical Engineering</option>
+              <option value="mech">Mechanical Engineering</option>
+              <option value="physics">Applied Physics</option>
+              <option value="chem">Chemistry & Nano</option>
+              <option value="mat">Materials Science</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 13px;">
+            <i class="fa-solid fa-play"></i> Start Ingestion & Synchronization
+          </button>
+        </form>
+
+        <div id="ingestProgressContainer" class="hidden" style="padding: 10px 0;">
+          <h4 id="ingestStageText" style="font-size: 14px; color: #fff; margin-bottom: 12px; font-family: var(--font-mono);">Processing...</h4>
+          <div style="height: 6px; width: 100%; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 16px;">
+            <div id="ingestProgressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green)); transition: width 0.3s ease;"></div>
+          </div>
+          <div id="ingestStepList" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-dim);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button for Instant Upload -->
+  <button id="fabUpload" class="fab-upload-btn" title="Upload Research Paper / PDF">
+    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 16px; color: var(--neon-cyan);"></i>
+    <span>Upload PDF / Paper</span>
+  </button>
+
+  <!-- Third Party CDNs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Modular Scripts -->
+  <script type="module" src="./js/mockData.js"></script>
+  <script type="module" src="./js/firebaseAuth.js"></script>
+  <script type="module" src="./js/matcher.js"></script>
+  <script type="module" src="./js/ingest.js"></script>
+  <script type="module" src="./js/app.js"></script>
+  <script type="module">
+    import PaperMatcherController from './js/matcher.js';
+    import IngestionController from './js/ingest.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      window.AppMatcher = new PaperMatcherController();
+      window.AppMatcher.init();
+      window.AppIngest = new IngestionController();
+      window.AppIngest.init();
+    });
+  </script>
+</body>
+</html>

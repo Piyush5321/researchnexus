@@ -1,6 +1,6 @@
 /**
- * ResearchNexus - Mock Data Service (FastAPI REST API Adapter Layer)
- * Mimics asynchronous JSON responses from backend endpoint: /api/v1/...
+ * ResearchNexus - Mock Data Service & Vector Matcher Engine (FastAPI REST API Adapter Layer)
+ * Mimics asynchronous JSON responses, intelligent PDF/text parsing, and graph synchronization
  */
 
 const MockAPI = (function() {
@@ -26,7 +26,7 @@ const MockAPI = (function() {
   ];
 
   // 3. Cytoscape Graph Nodes and Edges
-  const graphElements = {
+  let graphElements = {
     nodes: [
       // Core Navier-Stokes Cluster (The Silo Problem)
       {
@@ -93,7 +93,8 @@ const MockAPI = (function() {
           similarity: 0.88,
           doi: '10.1103/PhysRevLett.132.040601',
           repo: 'github.com/tanaka-qphys/tensor-glass',
-          abstract: 'Higher-order SVD algorithm for 2D disordered Hamiltonian contraction with bond dimension truncation.'
+          abstract: 'Higher-order SVD algorithm for 2D disordered Hamiltonian contraction with bond dimension truncation.',
+          mathAstCode: 'Tensor contract_and_truncate(const Tensor& T, int bond_dim, double eps) {\n    auto [U, S, V] = randomized_rsvd(T.matrix_view(), bond_dim);\n    return filter_singular_values(U, S, V, eps);\n}'
         }
       },
       {
@@ -109,7 +110,8 @@ const MockAPI = (function() {
           similarity: 0.88,
           doi: '10.1145/3637528.36719',
           repo: 'github.com/lin-ai-lab/distributed-svd',
-          abstract: 'Randomized and rank-adaptive tensor contraction pipeline for trillion-edge sparse adjacency graphs.'
+          abstract: 'Randomized and rank-adaptive tensor contraction pipeline for trillion-edge sparse adjacency graphs.',
+          mathAstCode: 'Matrix reduce_sparse_rank(const SparseMatrix& A, int target_k, double tol) {\n    auto [Q, Sigma, W] = randomized_svd_core(A, target_k);\n    return truncate_spectrum(Q, Sigma, W, tol);\n}'
         }
       },
       // Spectroscopy / Material Chemistry Cluster
@@ -126,7 +128,8 @@ const MockAPI = (function() {
           similarity: 0.91,
           doi: '10.1021/acs.nanolett.4c012',
           repo: 'github.com/almansoor-chem/tmd-spectro',
-          abstract: 'Spectroscopic peak-deconvolution pipeline for ultrafast phonon decay dynamics in MoS2 monolayers.'
+          abstract: 'Spectroscopic peak-deconvolution pipeline for ultrafast phonon decay dynamics in MoS2 monolayers.',
+          mathAstCode: 'def deconvolve_lorentzian_peaks(freq, intensity, centers, gammas):\n    model = sum(A / (1.0 + ((freq - c) / g)**2) for A, c, g in zip(amps, centers, gammas))\n    return scipy.optimize.least_squares(residual, init_p, args=(freq, intensity))'
         }
       },
       {
@@ -142,7 +145,41 @@ const MockAPI = (function() {
           similarity: 0.91,
           doi: '10.1038/s41563-024-01821-x',
           repo: 'github.com/cruz-matsci/raman-deconv-pipeline',
-          abstract: 'Identical Lorentzian-Gaussian deconvolution fitting routines deployed on overlapping beamline datasets.'
+          abstract: 'Identical Lorentzian-Gaussian deconvolution fitting routines deployed on overlapping beamline datasets.',
+          mathAstCode: 'def fit_spectral_lineshape(wavenumber, counts, peak_locs, hwhm):\n    envelope = sum(amp / (1.0 + ((wavenumber - x0) / gamma)**2) for amp, x0, gamma in zip(A, peak_locs, hwhm))\n    return scipy.optimize.least_squares(residual, p0, args=(wavenumber, counts))'
+        }
+      },
+      // Graph Neural PDEs Cluster
+      {
+        data: {
+          id: 'paper-cs-gnn',
+          name: 'Geometric Message Passing for Discretized Manifold PDEs',
+          label: 'GNN PDE Solvers (CS)',
+          type: 'paper',
+          dept: 'cs',
+          author: 'Dr. Kevin Zhao',
+          year: 2024,
+          astMatch: '84% vs Mech CFD',
+          similarity: 0.84,
+          doi: '10.1609/aaai.2024.1198',
+          repo: 'github.com/zhao-ai/geometric-pde',
+          abstract: 'Deep learning surrogate architecture estimating high-dimensional fluid velocity fields on unstructured 3D meshes without explicit matrix inversion.'
+        }
+      },
+      {
+        data: {
+          id: 'algo-phase-field',
+          name: 'Cahn-Hilliard Phase-Field Boundary Interface Formulation',
+          label: 'Cahn-Hilliard (Phys)',
+          type: 'algorithm',
+          dept: 'physics',
+          author: 'Dr. Marcus Thorne',
+          year: 2023,
+          astMatch: '86% vs Bio Capillary',
+          similarity: 0.86,
+          doi: '10.1103/PhysRevE.108.024101',
+          repo: 'github.com/thorne-lab/phasefield-sim',
+          abstract: '4th-order non-linear PDE algorithm tracking dynamic multi-phase fluid boundaries with diffuse interfacial energy minimization.'
         }
       },
       // Datasets & Supporting Nodes
@@ -197,18 +234,23 @@ const MockAPI = (function() {
     ],
     edges: [
       // Silo Navier-Stokes Bridge
-      { data: { id: 'e-bio-mech', source: 'paper-bio-01', target: 'paper-mech-01', similarity: 0.92, label: '92% AST Match', type: 'redundancy' } },
-      { data: { id: 'e-bio-code', source: 'paper-bio-01', target: 'code-solver-01', similarity: 0.85, label: 'Uses Kernel', type: 'citation' } },
-      { data: { id: 'e-mech-code', source: 'paper-mech-01', target: 'code-solver-01', similarity: 0.86, label: 'Uses Kernel', type: 'citation' } },
-      { data: { id: 'e-bio-author', source: 'author-rostova', target: 'paper-bio-01', similarity: 1.0, label: 'Lead Author', type: 'authorship' } },
-      { data: { id: 'e-mech-author', source: 'author-vance', target: 'paper-mech-01', similarity: 1.0, label: 'Lead Author', type: 'authorship' } },
-      { data: { id: 'e-bio-data', source: 'paper-bio-01', target: 'data-coronary-ct', similarity: 0.9, label: 'Training Data', type: 'dataset' } },
+      { data: { id: 'e-bio-mech', source: 'paper-bio-01', target: 'paper-mech-01', similarity: 0.92, label: '92% AST Match', type: 'redundancy', weight: 0.92 } },
+      { data: { id: 'e-bio-code', source: 'paper-bio-01', target: 'code-solver-01', similarity: 0.85, label: 'Uses Kernel', type: 'citation', weight: 0.85 } },
+      { data: { id: 'e-mech-code', source: 'paper-mech-01', target: 'code-solver-01', similarity: 0.86, label: 'Uses Kernel', type: 'citation', weight: 0.86 } },
+      { data: { id: 'e-bio-author', source: 'author-rostova', target: 'paper-bio-01', similarity: 1.0, label: 'Lead Author', type: 'authorship', weight: 1.0 } },
+      { data: { id: 'e-mech-author', source: 'author-vance', target: 'paper-mech-01', similarity: 1.0, label: 'Lead Author', type: 'authorship', weight: 1.0 } },
+      { data: { id: 'e-bio-data', source: 'paper-bio-01', target: 'data-coronary-ct', similarity: 0.9, label: 'Training Data', type: 'dataset', weight: 0.9 } },
 
       // Quantum / Matrix Solver Bridge
-      { data: { id: 'e-phys-cs', source: 'paper-phys-01', target: 'algo-cs-01', similarity: 0.88, label: '88% Math Match', type: 'redundancy' } },
+      { data: { id: 'e-phys-cs', source: 'paper-phys-01', target: 'algo-cs-01', similarity: 0.88, label: '88% Math Match', type: 'redundancy', weight: 0.88 } },
 
       // Spectroscopy Bridge
-      { data: { id: 'e-chem-mat', source: 'paper-chem-01', target: 'paper-mat-01', similarity: 0.91, label: '91% Method Match', type: 'redundancy' } }
+      { data: { id: 'e-chem-mat', source: 'paper-chem-01', target: 'paper-mat-01', similarity: 0.91, label: '91% Method Match', type: 'redundancy', weight: 0.91 } },
+
+      // GNN PDE surrogate to Bio and Mech Navier-Stokes
+      { data: { id: 'e-gnn-bio', source: 'paper-cs-gnn', target: 'paper-bio-01', similarity: 0.84, label: '84% Surrogate', type: 'citation', weight: 0.84 } },
+      { data: { id: 'e-gnn-mech', source: 'paper-cs-gnn', target: 'paper-mech-01', similarity: 0.81, label: '81% Surrogate', type: 'citation', weight: 0.81 } },
+      { data: { id: 'e-phase-bio', source: 'algo-phase-field', target: 'paper-bio-01', similarity: 0.86, label: '86% Interface', type: 'citation', weight: 0.86 } }
     ]
   };
 
@@ -348,20 +390,43 @@ const MockAPI = (function() {
     computeHoursConsolidated: '128,400 hrs'
   };
 
-  // Public Mock API methods simulating async REST latency
+  // Helper to extract text from file or raw string
+  async function extractFileOrText(fileData, rawText) {
+    if (rawText && rawText.trim().length > 0) {
+      return rawText.trim();
+    }
+    if (fileData && typeof fileData.text === 'function') {
+      try {
+        const txt = await fileData.text();
+        if (txt && txt.trim().length > 10) return txt.trim();
+      } catch (e) {
+        // file reading fallback
+      }
+    }
+    if (fileData && fileData.name) {
+      return fileData.name;
+    }
+    return '';
+  }
+
+  // Public Mock API methods
   return {
     async getDepartments() {
-      await new Promise(r => setTimeout(r, 60));
+      await new Promise(r => setTimeout(r, 40));
       return departments;
     },
 
     async getEntityTypes() {
-      await new Promise(r => setTimeout(r, 40));
+      await new Promise(r => setTimeout(r, 30));
       return entityTypes;
     },
 
+    async getGraphElements() {
+      return graphElements;
+    },
+
     async getGraphData(filters = {}) {
-      await new Promise(r => setTimeout(r, 120));
+      await new Promise(r => setTimeout(r, 60));
       const { selectedDepts, selectedTypes, similarityThreshold = 0.5 } = filters;
 
       let filteredNodes = graphElements.nodes;
@@ -387,17 +452,17 @@ const MockAPI = (function() {
     },
 
     async getRedundancyMatrix() {
-      await new Promise(r => setTimeout(r, 80));
+      await new Promise(r => setTimeout(r, 50));
       return redundancyMatrix;
     },
 
     async getRedundancyAlerts() {
-      await new Promise(r => setTimeout(r, 90));
+      await new Promise(r => setTimeout(r, 60));
       return redundancyAlerts;
     },
 
     async getSystemMetrics() {
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => setTimeout(r, 30));
       return systemMetrics;
     },
 
@@ -405,110 +470,212 @@ const MockAPI = (function() {
       if (!query || query.trim() === '') return [];
       const q = query.toLowerCase();
       return graphElements.nodes.filter(n => 
-        n.data.name.toLowerCase().includes(q) ||
-        n.data.author.toLowerCase().includes(q) ||
-        n.data.dept.toLowerCase().includes(q)
+        (n.data.name && n.data.name.toLowerCase().includes(q)) ||
+        (n.data.author && n.data.author.toLowerCase().includes(q)) ||
+        (n.data.dept && n.data.dept.toLowerCase().includes(q)) ||
+        (n.data.abstract && n.data.abstract.toLowerCase().includes(q))
       ).map(n => n.data);
     },
 
+    /**
+     * Institutional Research & PDF Ingestion Analyzer
+     * Parses uploaded paper PDF / text, determines domain genre, extracted math equations,
+     * and maps exactly which existing research paper(s) this is relevant to and why.
+     */
     async analyzeAndMatchPaper(fileData, rawText, department = 'all') {
-      await new Promise(r => setTimeout(r, 1200));
-      const sampleGenres = [
-        { genre: 'Computational Fluid Dynamics', confidence: 0.94, keywords: ['Navier-Stokes', 'Casson Fluid', 'Finite Volume Method'] },
-        { genre: 'Applied Deep Learning & Graph NN', confidence: 0.88, keywords: ['Message Passing', 'Graph Convolution', 'Representation Learning'] },
-        { genre: 'Biomedical Microfluidics', confidence: 0.91, keywords: ['Hemodynamics', 'Stenosis', 'Arterial Shear Stress'] },
-        { genre: 'Quantum Information & QEC', confidence: 0.85, keywords: ['Surface Codes', 'Syndrome Extraction', 'Decoherence'] }
-      ];
+      await new Promise(r => setTimeout(r, 600));
 
-      let selectedGenre = sampleGenres[0];
-      if (rawText) {
-        const lower = rawText.toLowerCase();
-        if (lower.includes('graph') || lower.includes('neural') || lower.includes('embed')) {
-          selectedGenre = sampleGenres[1];
-        } else if (lower.includes('bio') || lower.includes('blood') || lower.includes('arter')) {
-          selectedGenre = sampleGenres[2];
-        } else if (lower.includes('quantum') || lower.includes('qubit') || lower.includes('spin')) {
-          selectedGenre = sampleGenres[3];
-        }
+      const inputContent = await extractFileOrText(fileData, rawText);
+      const fileName = fileData?.name || 'Uploaded_Research_Paper.pdf';
+      const textLower = (inputContent + ' ' + fileName).toLowerCase();
+
+      // Domain taxonomy catalog with intelligent keyword mapping
+      let detectedTopic = 'Computational Fluid Dynamics & Non-Newtonian Rheology';
+      let confidence = 0.94;
+      let kernels = ['Navier-Stokes (Incompressible 3D)', 'Casson Shear-Thinning Formulation', 'Finite Volume Method', 'Pressure-Velocity SIMPLEC'];
+      let primaryDept = 'bio';
+
+      if (textLower.includes('quantum') || textLower.includes('spin') || textLower.includes('qubit') || textLower.includes('hamiltonian') || textLower.includes('tensor')) {
+        detectedTopic = 'Quantum Information & Tensor Network SVD';
+        confidence = 0.93;
+        kernels = ['Higher-Order Tensor SVD', 'Bond Dimension Truncation', 'Randomized Matrix Factorization', 'Schmidt Decomposition'];
+        primaryDept = 'physics';
+      } else if (textLower.includes('graph') || textLower.includes('gnn') || textLower.includes('surrogate') || textLower.includes('neural') || textLower.includes('deep learning')) {
+        detectedTopic = 'Geometric Deep Learning & Neural PDE Surrogates';
+        confidence = 0.91;
+        kernels = ['Message Passing GNN', 'Discretized Laplace-Beltrami', 'Physics-Informed Loss MSE', 'Graph Convolutions'];
+        primaryDept = 'cs';
+      } else if (textLower.includes('raman') || textLower.includes('spectro') || textLower.includes('phonon') || textLower.includes('mos2') || textLower.includes('monolayer') || textLower.includes('beamtime')) {
+        detectedTopic = '2D Nanomaterial Raman Spectroscopy';
+        confidence = 0.95;
+        kernels = ['Lorentzian-Gaussian Peak Deconvolution', 'Phonon Lifetime Integral', 'Non-linear Least Squares', 'Voigt Profile'];
+        primaryDept = 'chem';
+      } else if (textLower.includes('phase') || textLower.includes('cahn') || textLower.includes('capillary') || textLower.includes('interfacial') || textLower.includes('surface tension')) {
+        detectedTopic = 'Multi-Phase Capillary Interface Dynamics';
+        confidence = 0.89;
+        kernels = ['Cahn-Hilliard Phase-Field PDE', 'Navier-Stokes Interfacial Coupling', 'Diffuse Interface Energy', 'Surface Tension Curvature'];
+        primaryDept = 'physics';
+      } else if (textLower.includes('turbine') || textLower.includes('nozzle') || textLower.includes('coolant') || textLower.includes('mechanical')) {
+        detectedTopic = 'Mechanical Micro-Turbine Injection CFD';
+        confidence = 0.92;
+        kernels = ['Discretized Navier-Stokes', 'Casson Yield Stress', 'High-Shear Strain Tensor', 'Unstructured Mesh CFD'];
+        primaryDept = 'mech';
       }
 
-      const matchedPapers = [
+      // Compute relevance to all existing papers in the institution
+      const topMatches = [
+        {
+          id: 'paper-bio-01',
+          title: 'Microfluidic Hemodynamics in Stenotic Coronary Bifurcations',
+          department: 'Biomedical Engineering',
+          deptCode: 'bio',
+          author: 'Dr. Elena Rostova',
+          similarityScore: textLower.includes('bio') || textLower.includes('fluid') || textLower.includes('hemo') || textLower.includes('navier') || textLower.includes('shear') ? 0.94 : 0.72,
+          genreOverlap: 'Direct Mathematical Formulation Equivalence (Casson Navier-Stokes)',
+          equationsMatched: ['3D Incompressible Navier-Stokes Momentum', 'Casson Viscosity Relation: τ = (√τ₀ + √(μ_inf · γ̇))²'],
+          whyRelevant: 'This uploaded document utilizes the exact same non-Newtonian constitutive formulation and finite-volume Navier-Stokes solver as Dr. Rostova\'s lab at BioEngineering.',
+          redundancyAlertRisk: 'HIGH - Unmonitored dual funding risk across BioEngineering and Medical Center computational clusters.',
+          recommendedCollaboration: 'Establish a unified Open-Source CFD core repository and co-author a joint grant proposal for NIH/NSF.'
+        },
         {
           id: 'paper-mech-01',
           title: 'Non-Newtonian Coolant Flow in Micro-Turbine Injectors',
           department: 'Mechanical Engineering',
           deptCode: 'mech',
           author: 'Prof. Arthur Vance',
-          similarityScore: 0.92,
-          genreOverlap: 'High (CFD / Non-Newtonian Math Kernel)',
-          equationsMatched: ['Navier-Stokes Momentum', 'Casson Viscosity Relation'],
-          recommendedCollaboration: 'Joint grant submission for NSF Fluid Dynamics & Cardiovascular Modeling initiative.'
+          similarityScore: textLower.includes('mech') || textLower.includes('turbine') || textLower.includes('coolant') || textLower.includes('fluid') || textLower.includes('shear') ? 0.92 : 0.68,
+          genreOverlap: 'High Algorithmic Overlap (Turbine & Micro-Nozzle Solvers)',
+          equationsMatched: ['Shear-thinning Yield-Stress Equation', 'SIMPLEC Pressure-Velocity Coupling'],
+          whyRelevant: 'Relevant because both research efforts simulate high-shear non-Newtonian fluids in sub-millimeter geometry, solving identical momentum conservation PDE matrices.',
+          redundancyAlertRisk: 'CRITICAL - $148,000 estimated compute cycle duplication if both groups execute parallel GPU simulations.',
+          recommendedCollaboration: 'Share CUDA-accelerated boundary mesh solvers and coordinate GPU cluster reservation schedules.'
         },
         {
-          id: 'paper-cs-01',
-          title: 'Graph Neural Solvers for Partial Differential Equations',
+          id: 'algo-cs-01',
+          title: 'Distributed Truncated SVD for Low-Rank Graph Embeddings',
           department: 'Computer Science',
           deptCode: 'cs',
-          author: 'Dr. Sarah Lin',
-          similarityScore: 0.78,
-          genreOverlap: 'Moderate (Geometric Deep Learning / PDE Surrogate)',
-          equationsMatched: ['Discretized Laplacian Operators', 'Mesh Invariant Embeddings'],
-          recommendedCollaboration: 'Incorporate GNN physics surrogate to accelerate 3D volumetric blood simulation.'
+          author: 'Prof. Maya Lin',
+          similarityScore: textLower.includes('quantum') || textLower.includes('svd') || textLower.includes('graph') || textLower.includes('tensor') ? 0.89 : 0.65,
+          genreOverlap: 'Tensor Decomposition & Spectrum Truncation',
+          equationsMatched: ['Randomized SVD: A ≈ Q(Q* A) = Q(U Σ V*)', 'Rank-Adaptive Truncation Spectrum'],
+          whyRelevant: 'Prof. Lin\'s graph factorization routine in CS directly parallels the higher-order tensor contraction methods, allowing mutual acceleration of high-dimensional matrix solvers.',
+          redundancyAlertRisk: 'MODERATE - Algorithmic convergence between theoretical physics and AI systems.',
+          recommendedCollaboration: 'Integrate the distributed SVD kernel into the campus-wide High-Performance Computing library.'
         },
         {
-          id: 'paper-physics-01',
-          title: 'Phase-Field Modeling of Capillary Micro-Flows',
-          department: 'Applied Physics',
-          deptCode: 'physics',
-          author: 'Dr. Marcus Thorne',
-          similarityScore: 0.74,
-          genreOverlap: 'Moderate (Continuum Mechanics / Surface Tension)',
-          equationsMatched: ['Cahn-Hilliard Phase Boundary', 'Navier-Stokes Convection'],
-          recommendedCollaboration: 'Share laser Doppler velocimetry experimental benchmark dataset.'
+          id: 'paper-chem-01',
+          title: 'Time-Resolved Raman Spectroscopy of 2D Transition Metal Dichalcogenides',
+          department: 'Chemistry & Nano',
+          deptCode: 'chem',
+          author: 'Dr. Sarah Al-Mansoor',
+          similarityScore: textLower.includes('raman') || textLower.includes('spectro') || textLower.includes('phonon') || textLower.includes('chem') ? 0.91 : 0.61,
+          genreOverlap: 'Lorentzian Deconvolution & Phonon Decay Modeling',
+          equationsMatched: ['Lorentzian Spectral Lineshape: I(ω) = Σ A_k / (1 + ((ω - ω_k)/Γ_k)²)', 'Nonlinear Least Squares Levenberg-Marquardt'],
+          whyRelevant: 'Shares identical curve-fitting and beamline deconvolution routines with Materials Science and Applied Chemistry laboratories.',
+          redundancyAlertRisk: 'HIGH - Concurrent synchrotron beamline applications flagged for identical material characterization.',
+          recommendedCollaboration: 'Merge beamtime allocation requests into a single university consortium application.'
         }
       ];
 
+      // Sort by similarity score descending
+      topMatches.sort((a, b) => b.similarityScore - a.similarityScore);
+
       return {
         success: true,
+        documentId: 'DOC-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
         analyzedDocument: {
-          title: fileData?.name || 'Uploaded Research Draft / Abstract',
-          detectedGenre: selectedGenre.genre,
-          genreConfidence: selectedGenre.confidence,
-          keyMathematicalKernels: selectedGenre.keywords,
+          title: fileName.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
+          detectedGenre: detectedTopic,
+          genreConfidence: confidence,
+          primaryDepartment: primaryDept,
+          keyMathematicalKernels: kernels,
           estimatedEmbeddingDimensions: 768,
-          vectorNorm: 1.0
+          vectorNorm: 1.0,
+          rawSummary: `Automated AST compiler analysis and 768-D semantic vector embedding extracted ${kernels.length} core mathematical operators with ${Math.round(confidence * 100)}% classification confidence.`
         },
-        topMatches: matchedPapers
+        topMatches: topMatches
+      };
+    },
+
+    /**
+     * Synchronize newly uploaded document directly into the live Cytoscape Knowledge Graph
+     */
+    async addNodeToGraph(docPayload) {
+      const newId = 'paper-user-' + Date.now().toString(36);
+      const newNode = {
+        data: {
+          id: newId,
+          name: docPayload.title || 'Ingested Research Paper',
+          label: (docPayload.title || 'User Paper').substring(0, 18) + ' (New)',
+          type: 'paper',
+          dept: docPayload.dept || 'cs',
+          author: docPayload.author || 'Institutional Researcher',
+          year: 2025,
+          astMatch: `${Math.round((docPayload.topScore || 0.9) * 100)}% Cross-Dept Overlap`,
+          similarity: docPayload.topScore || 0.9,
+          doi: `10.1145/nexus.upload.${Date.now().toString().slice(-4)}`,
+          repo: 'internal-vault.nexus.edu/ingested',
+          abstract: docPayload.abstract || docPayload.rawSummary || 'Newly ingested and vectorized research paper synchronized with institutional graph repository.',
+          mathAstCode: docPayload.mathSnippet || 'def parsed_kernel(data):\n    # Dynamically generated AST vector kernel\n    return alloydb_hnsw_match(data, dim=768)'
+        }
+      };
+
+      graphElements.nodes.push(newNode);
+
+      // Create edges to top matched targets
+      const targetId = docPayload.targetId || 'paper-bio-01';
+      const newEdge = {
+        data: {
+          id: `e-user-${targetId}-${Date.now().toString(36)}`,
+          source: newId,
+          target: targetId,
+          similarity: docPayload.topScore || 0.92,
+          label: `${Math.round((docPayload.topScore || 0.92) * 100)}% Relevancy`,
+          type: 'redundancy',
+          weight: docPayload.topScore || 0.92
+        }
+      };
+      graphElements.edges.push(newEdge);
+
+      systemMetrics.papersIndexed += 1;
+      systemMetrics.redundanciesDetected += 1;
+
+      return {
+        success: true,
+        newNodeId: newId,
+        totalNodes: graphElements.nodes.length,
+        totalEdges: graphElements.edges.length
       };
     },
 
     async ingestDocument(formData, onProgress) {
       const steps = [
-        { stage: 'Parsing PDF & extracting LaTeX formulas', pct: 25 },
-        { stage: 'Analyzing Python/C++ AST syntax trees', pct: 50 },
-        { stage: 'Generating cross-disciplinary knowledge triplets', pct: 75 },
-        { stage: 'Indexing 768-d vector embeddings in AlloyDB', pct: 100 }
+        { stage: '1/4: Parsing PDF text, abstracts & LaTeX formulas with PyMuPDF', pct: 25 },
+        { stage: '2/4: Analyzing Python/CUDA AST syntax trees and mathematical operators', pct: 50 },
+        { stage: '3/4: Generating 768-D multi-department knowledge triplets with Gemini', pct: 75 },
+        { stage: '4/4: Performing sub-millisecond HNSW vector indexing in AlloyDB pgvector', pct: 100 }
       ];
 
       for (const step of steps) {
-        await new Promise(r => setTimeout(r, 450));
+        await new Promise(r => setTimeout(r, 400));
         if (typeof onProgress === 'function') onProgress(step);
       }
 
       return {
         success: true,
         ingestionId: 'INGEST-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
-        nodesCreated: 14,
-        edgesCreated: 32,
+        nodesCreated: 1,
+        edgesCreated: 3,
         potentialRedundancies: 2
       };
     },
 
     async triggerNewAnalysis(payload) {
-      await new Promise(r => setTimeout(r, 1500));
+      await new Promise(r => setTimeout(r, 800));
       return {
         success: true,
-        jobId: 'JOB-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
+        jobId: 'SCAN-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
         timestamp: new Date().toISOString(),
         newTripletsExtracted: 142,
         anomaliesFlagged: 3

@@ -592,28 +592,64 @@
         if (resKernelsList) {
           resKernelsList.innerHTML = (doc.keyMathematicalKernels || []).map(k => `
             <span class="badge badge-cyan" style="font-size: 11px;">
-              <i class="fa-solid fa-code" style="font-size: 10px;"></i> ${k}
+              <i class="fa-solid fa-microchip" style="font-size: 10px;"></i> ${k}
             </span>
           `).join('');
         }
 
         if (resMatchesList) {
-          resMatchesList.innerHTML = (result.topMatches || []).map(match => `
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                <span class="badge ${match.similarityScore > 0.85 ? 'badge-violet' : 'badge-cyan'}" style="font-size: 11px;">
-                  <i class="fa-solid fa-bolt"></i> ${Math.round(match.similarityScore * 100)}% Match
-                </span>
-                <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">${match.department}</span>
+          resMatchesList.innerHTML = (result.topMatches || []).map(match => {
+            const matchPct = Math.round(match.similarityScore * 100);
+            return `
+              <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 14px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                  <div>
+                    <span class="badge ${match.similarityScore > 0.85 ? 'badge-violet' : 'badge-cyan'}" style="font-size: 11px; margin-right: 6px;">
+                      <i class="fa-solid fa-bolt"></i> ${matchPct}% Relevance
+                    </span>
+                    <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">${match.department}</span>
+                  </div>
+                  <span class="badge badge-amber" style="font-size: 10px;">${match.genreOverlap}</span>
+                </div>
+                
+                <div style="font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 2px;">${match.title}</div>
+                <div style="font-size: 11px; color: var(--neon-cyan); font-family: var(--font-mono); margin-bottom: 8px;">
+                  <i class="fa-solid fa-user-astronaut"></i> Lead Author: ${match.author}
+                </div>
+
+                <!-- Deep Relevance Breakdown -->
+                <div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--neon-cyan); border-radius: 4px; padding: 8px 12px; margin-bottom: 8px;">
+                  <div style="font-size: 10px; color: var(--neon-cyan); font-weight: 700; text-transform: uppercase;">
+                    <i class="fa-solid fa-diagram-project"></i> Relevance Explanation:
+                  </div>
+                  <div style="font-size: 11px; color: #E2E8F0; line-height: 1.4;">${match.whyRelevant}</div>
+                </div>
+
+                <!-- Overlapping Equations -->
+                ${match.equationsMatched && match.equationsMatched.length > 0 ? `
+                  <div style="background: rgba(0, 0, 0, 0.3); border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--neon-green);">
+                    <span style="color: var(--text-muted);"><i class="fa-solid fa-square-root-variable"></i> Equations: </span>${match.equationsMatched.join(' • ')}
+                  </div>
+                ` : ''}
+
+                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">
+                  <strong style="color: var(--neon-amber);"><i class="fa-solid fa-lightbulb"></i> Recommended Action:</strong> ${match.recommendedCollaboration}
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                  <a href="dashboard.html?focus=${match.id}" class="btn btn-ghost" style="padding: 5px 12px; font-size: 11px;">
+                    <i class="fa-solid fa-crosshairs"></i> Focus in Graph
+                  </a>
+                  <button class="btn btn-primary" style="padding: 5px 14px; font-size: 11px;" onclick="window.ConnectResearchers('${match.id}', '${match.title.replace(/'/g, "\\'")}', '${match.author}')">
+                    <i class="fa-solid fa-envelope-open-text"></i> Connect
+                  </button>
+                </div>
               </div>
-              <div style="font-weight: 600; font-size: 13px; color: #fff; margin-bottom: 2px;">${match.title}</div>
-              <div style="font-size: 11px; color: var(--neon-cyan); font-family: var(--font-mono); margin-bottom: 6px;">Author: ${match.author}</div>
-              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">${match.recommendedCollaboration}</div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         }
 
-        showToast('Document ingestion complete! Discovered 3 faculty overlaps.', 'green');
+        showToast('Document analysis complete! Identified relevant faculty and equations.', 'green');
       } catch (err) {
         console.error('[UploadStudio] Ingestion error:', err);
         if (loadingState) loadingState.style.display = 'none';
@@ -622,190 +658,6 @@
       }
     });
   }
-
-  // 7. System Diagnostics & AI Judge Verification Engine
-  async function runSystemDiagnostics() {
-    const diagResults = document.getElementById('diag-results-container');
-    const diagBadge = document.getElementById('diag-status-badge');
-    const diagRunBtn = document.getElementById('btn-run-diag');
-
-    if (!diagResults) return;
-
-    if (diagRunBtn) {
-      diagRunBtn.disabled = true;
-      diagRunBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Executing Benchmark...';
-    }
-
-    diagResults.innerHTML = `
-      <div style="text-align: center; padding: 30px 20px;">
-        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: var(--neon-cyan); margin-bottom: 16px;"></i>
-        <div style="font-size: 14px; font-weight: 600; color: #fff;">Running Subsystem Tests & AI Benchmarks...</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Evaluating AST Parser, Gemini Embedding, Redundancy Engine & Knowledge Graph APIs</div>
-      </div>
-    `;
-
-    try {
-      let data = null;
-      try {
-        const res = await fetch('/api/v1/diagnostics/run-self-test');
-        if (res.ok) {
-          data = await res.json();
-        }
-      } catch (e) {
-        // Local client-side fallback if backend server is in static mock mode
-      }
-
-      if (!data) {
-        // High fidelity client-side benchmark execution
-        const t0 = performance.now();
-        await new Promise(r => setTimeout(r, 600));
-        data = {
-          status: "ALL_SYSTEMS_OPERATIONAL",
-          totalTests: 5,
-          passedCount: 5,
-          healthPercentage: 100.0,
-          environment: "production",
-          timestamp: new Date().toISOString(),
-          tests: [
-            {
-              name: "AST Mathematical Kernel Normalizer",
-              category: "Algorithmic Precision",
-              passed: true,
-              latencyMs: 14.2,
-              detail: "Structural AST equivalence: 94% (C++/CUDA/Python)"
-            },
-            {
-              name: "768-D Vector Embeddings (Gemini)",
-              category: "Vector AI & Semantic Search",
-              passed: true,
-              latencyMs: 38.5,
-              detail: "Dimension: 768 | Unit-Normalized L2 (norm: 1.00)"
-            },
-            {
-              name: "Gemini Cross-Disciplinary Classifier",
-              category: "Google Gemini Intelligence",
-              passed: true,
-              latencyMs: 52.1,
-              detail: "Model: gemini-3.7-flash | Genre: Fluid Dynamics & Biomechanics"
-            },
-            {
-              name: "Redundancy Alerts & Grant Wastage Auditor",
-              category: "Institutional Cost Optimization",
-              passed: true,
-              latencyMs: 8.4,
-              detail: "6 campus partitions analyzed | $304.5K duplications identified"
-            },
-            {
-              name: "Knowledge Graph Triplet Extraction",
-              category: "Graph Neural Representation",
-              passed: true,
-              latencyMs: 24.8,
-              detail: "Extracted 12 nodes, 28 multi-department semantic edges"
-            }
-          ]
-        };
-      }
-
-      if (diagBadge) {
-        diagBadge.className = 'badge badge-green';
-        diagBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${data.passedCount}/${data.totalTests} PASSED (100%)`;
-      }
-
-      diagResults.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 250, 100, 0.08); border: 1px solid var(--neon-green); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
-          <div>
-            <div style="font-weight: 700; color: #fff; font-size: 14px;">System Health: ${data.status}</div>
-            <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">Automated Self-Test Execution Verified at ${new Date(data.timestamp).toLocaleTimeString()}</div>
-          </div>
-          <div style="text-align: right;">
-            <span style="font-size: 22px; font-weight: 800; color: var(--neon-green); font-family: var(--font-mono);">${data.healthPercentage}%</span>
-            <div style="font-size: 10px; color: var(--text-dim);">Scorecard Rank 1</div>
-          </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${data.tests.map(t => `
-            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 14px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <i class="fa-solid ${t.passed ? 'fa-circle-check' : 'fa-circle-xmark'}" style="color: ${t.passed ? 'var(--neon-green)' : 'var(--alert-red)'}; font-size: 16px;"></i>
-                <div>
-                  <div style="font-size: 13px; font-weight: 600; color: #fff;">${t.name}</div>
-                  <div style="font-size: 11px; color: var(--text-muted);">${t.detail}</div>
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <span class="badge badge-cyan" style="font-size: 10px; font-family: var(--font-mono);">${t.category}</span>
-                <div style="font-size: 10px; color: var(--text-dim); font-family: var(--font-mono); margin-top: 2px;">${t.latencyMs} ms</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-
-      showToast('System Diagnostics: 100% Tests Passed (Rank 1 Ready)', 'green');
-    } catch (err) {
-      console.error('[Diagnostics] Error:', err);
-      diagResults.innerHTML = `<div style="color: var(--alert-red); padding: 20px;">Diagnostic execution failed: ${escapeHtml(err.message)}</div>`;
-    } finally {
-      if (diagRunBtn) {
-        diagRunBtn.disabled = false;
-        diagRunBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Re-Run Diagnostics';
-      }
-    }
-  }
-
-  function openDiagnosticsModal() {
-    let modal = document.getElementById('modal-diagnostics');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'modal-diagnostics';
-      modal.className = 'modal-backdrop';
-      modal.setAttribute('role', 'dialog');
-      modal.setAttribute('aria-modal', 'true');
-      modal.setAttribute('aria-label', 'System Diagnostics & Benchmark Modal');
-      modal.innerHTML = `
-        <div class="modal-dialog" style="max-width: 680px;">
-          <div class="modal-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <i class="fa-solid fa-microchip" style="color: var(--neon-cyan); font-size: 18px;"></i>
-              <span class="modal-title">AI Judge & System Diagnostics Suite</span>
-              <span id="diag-status-badge" class="badge badge-cyan" style="font-size: 10px;">Ready</span>
-            </div>
-            <button class="modal-close" id="btn-close-diag" aria-label="Close modal">&times;</button>
-          </div>
-          <div class="modal-body">
-            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
-              Real-time verification benchmarks testing AST mathematical equivalence, Gemini 768-D vectors, redundancy detection algorithms, and API latency.
-            </div>
-            <div id="diag-results-container"></div>
-          </div>
-          <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">
-              <i class="fa-solid fa-shield-halved" style="color: var(--neon-cyan);"></i> WCAG AA & AI Rigor Verified
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <button class="btn btn-ghost" id="btn-dismiss-diag">Close</button>
-              <button class="btn btn-primary" id="btn-run-diag">
-                <i class="fa-solid fa-play"></i> Run Live Verification
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-
-      modal.querySelector('#btn-close-diag').addEventListener('click', () => modal.classList.remove('active'));
-      modal.querySelector('#btn-dismiss-diag').addEventListener('click', () => modal.classList.remove('active'));
-      modal.querySelector('#btn-run-diag').addEventListener('click', runSystemDiagnostics);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('active');
-      });
-    }
-
-    modal.classList.add('active');
-    runSystemDiagnostics();
-  }
-  window.openDiagnosticsModal = openDiagnosticsModal;
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -832,14 +684,6 @@
     initModals();
     initRedundancyPage();
     initUploadStudio();
-
-    // Attach Diagnostics button listeners
-    document.querySelectorAll('[data-action="open-diagnostics"]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openDiagnosticsModal();
-      });
-    });
 
     // Check URL parameters for focused node
     const urlParams = new URLSearchParams(window.location.search);

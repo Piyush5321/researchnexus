@@ -173,9 +173,8 @@
         <span>ResearchNexus</span>
       </a>
 
-      <!-- AI Judge Diagnostics Benchmark Button -->
-      <button class="btn btn-ghost" data-action="open-diagnostics" style="padding: 6px 12px; font-size: 12px; border-color: rgba(0, 250, 100, 0.4); color: var(--neon-green);" aria-label="Run System Diagnostics and AI Benchmark">
-        <i class="fa-solid fa-microchip"></i> <span>Self-Test</span>
+      <button id="btnNavChatbot" class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(0, 240, 255, 0.4); color: var(--neon-cyan);" aria-label="Open Nexus AI Chatbot">
+        <i class="fa-solid fa-brain"></i> <span>Ask AI</span>
       </button>
 
       <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);" aria-label="Upload Research Paper">
@@ -325,17 +324,30 @@
       <!-- Cytoscape Target Element -->
       <div id="cy"></div>
 
+      <!-- Top Canvas Live HUD Badge -->
+      <div style="position: absolute; top: 16px; left: 16px; z-index: 10; display: flex; align-items: center; gap: 8px;" id="graph-live-hud-stats">
+        <span class="badge badge-cyan"><i class="fa-solid fa-circle-nodes"></i> 12 Nodes</span>
+        <span class="badge badge-violet"><i class="fa-solid fa-arrows-split-up-and-left"></i> 11 Edges</span>
+        <span class="badge badge-amber"><i class="fa-solid fa-bolt"></i> 3 Redundancies</span>
+      </div>
+
       <!-- Floating Graph Controls HUD -->
       <div class="canvas-hud">
-        <div class="glass-panel" style="display: flex; padding: 4px; border-radius: 8px;">
-          <button id="btn-zoom-in" class="icon-btn" title="Zoom In" style="border: none; width: 32px; height: 32px;"><i class="fa-solid fa-plus"></i></button>
-          <button id="btn-zoom-out" class="icon-btn" title="Zoom Out" style="border: none; width: 32px; height: 32px;"><i class="fa-solid fa-minus"></i></button>
-          <button id="btn-fit-view" class="icon-btn" title="Fit to View" style="border: none; width: 32px; height: 32px;"><i class="fa-solid fa-expand"></i></button>
-          <button id="btn-reset-layout" class="icon-btn" title="Re-Layout" style="border: none; width: 32px; height: 32px;"><i class="fa-solid fa-arrows-rotate"></i></button>
+        <div class="glass-panel" style="display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 8px;">
+          <select id="graph-layout-selector" class="glass-input" style="padding: 4px 8px; font-size: 11px; font-family: var(--font-mono); border-radius: 4px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid var(--border-subtle);">
+            <option value="cose">Physics (CoSE)</option>
+            <option value="concentric">Concentric Rings</option>
+            <option value="circle">Circular Ring</option>
+            <option value="grid">Grid Array</option>
+          </select>
+          <button id="btn-zoom-in" class="icon-btn" title="Zoom In" style="border: none; width: 30px; height: 30px;"><i class="fa-solid fa-plus"></i></button>
+          <button id="btn-zoom-out" class="icon-btn" title="Zoom Out" style="border: none; width: 30px; height: 30px;"><i class="fa-solid fa-minus"></i></button>
+          <button id="btn-fit-view" class="icon-btn" title="Fit to View" style="border: none; width: 30px; height: 30px;"><i class="fa-solid fa-expand"></i></button>
+          <button id="btn-reset-layout" class="icon-btn" title="Reset Physics Layout" style="border: none; width: 30px; height: 30px;"><i class="fa-solid fa-arrows-rotate"></i></button>
         </div>
 
-        <button id="btn-export-graph" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;">
-          <i class="fa-solid fa-download"></i> Export Graph PNG
+        <button id="btn-export-graph" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-download"></i> Export PNG
         </button>
       </div>
     </main>
@@ -384,6 +396,14 @@
           Extracted Computational Kernel (AST)
         </div>
         <pre style="background: #060911; border: 1px solid var(--border-subtle); padding: 10px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; color: #a5f3fc; overflow-x: auto;"><code id="inspect-code-snippet"></code></pre>
+      </div>
+
+      <!-- Directly Connected Overlapping Nodes -->
+      <div style="margin-bottom: 18px;">
+        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px;">
+          Directly Relevant Institutional Nodes
+        </div>
+        <div id="inspect-related-overlaps"></div>
       </div>
 
       <!-- Source Links -->
@@ -639,15 +659,20 @@
   <script type="module" src="./js/graph.js"></script>
   <script type="module" src="./js/matcher.js"></script>
   <script type="module" src="./js/ingest.js"></script>
+  <script type="module" src="./js/chatbot.js"></script>
   <script type="module" src="./js/app.js"></script>
   <script type="module">
     import PaperMatcherController from './js/matcher.js';
     import IngestionController from './js/ingest.js';
+    import ChatBotController from './js/chatbot.js';
     document.addEventListener('DOMContentLoaded', () => {
       window.AppMatcher = new PaperMatcherController();
       window.AppMatcher.init();
       window.AppIngest = new IngestionController();
       window.AppIngest.init();
+      window.AppChatbot = new ChatBotController();
+      window.AppChatbot.init();
+      window.NexusChatbot.instance = window.AppChatbot;
     });
   </script>
 </body>

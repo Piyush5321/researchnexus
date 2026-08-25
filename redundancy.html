@@ -82,9 +82,8 @@
     </nav>
 
     <div class="nav-actions">
-      <!-- AI Judge Diagnostics Benchmark Button -->
-      <button class="btn btn-ghost" data-action="open-diagnostics" style="padding: 7px 14px; font-size: 12px; border-color: rgba(0, 250, 100, 0.4); color: var(--neon-green);" aria-label="Run System Diagnostics and AI Benchmark">
-        <i class="fa-solid fa-microchip"></i> <span>Self-Test</span>
+      <button id="btnNavChatbot" class="btn btn-ghost" style="padding: 7px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(0, 240, 255, 0.4); color: var(--neon-cyan);" aria-label="Open Nexus AI Chatbot">
+        <i class="fa-solid fa-brain"></i> <span>Ask AI</span>
       </button>
 
       <button id="btnNavUpload" class="btn btn-primary" style="padding: 7px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);" aria-label="Upload Research Paper">
@@ -379,15 +378,20 @@
   <script type="module" src="./js/firebaseAuth.js"></script>
   <script type="module" src="./js/matcher.js"></script>
   <script type="module" src="./js/ingest.js"></script>
+  <script type="module" src="./js/chatbot.js"></script>
   <script type="module" src="./js/app.js"></script>
   <script type="module">
     import PaperMatcherController from './js/matcher.js';
     import IngestionController from './js/ingest.js';
+    import ChatBotController from './js/chatbot.js';
     document.addEventListener('DOMContentLoaded', () => {
       window.AppMatcher = new PaperMatcherController();
       window.AppMatcher.init();
       window.AppIngest = new IngestionController();
       window.AppIngest.init();
+      window.AppChatbot = new ChatBotController();
+      window.AppChatbot.init();
+      window.NexusChatbot.instance = window.AppChatbot;
     });
   </script>
 </body>

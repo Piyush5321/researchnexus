@@ -7,14 +7,28 @@ and serves the decoupled glassmorphic static frontend client.
 from contextlib import asynccontextmanager
 import logging
 import os
+import sys
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api.v1.router import api_router
-from backend.app.core.config import settings
-from backend.app.db.session import engine
+# Ensure module path resolution works across various execution environments
+app_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.dirname(app_dir)
+root_dir = os.path.dirname(backend_dir)
+for p in [app_dir, backend_dir, root_dir]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+try:
+    from backend.app.api.v1.router import api_router
+    from backend.app.core.config import settings
+    from backend.app.db.session import engine
+except ImportError:
+    from app.api.v1.router import api_router
+    from app.core.config import settings
+    from app.db.session import engine
 
 # Configure logging
 logging.basicConfig(

@@ -1,10 +1,9 @@
 import os
 import sys
 
-# Ensure backend directory is in sys.path
-backend_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(backend_dir)
-for p in [backend_dir, parent_dir]:
+root_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.join(root_dir, "backend")
+for p in [root_dir, backend_dir]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -13,7 +12,6 @@ try:
 except ImportError:
     from app.main import app as fastapi_app
 
-# Explicit top-level assignments for Vercel Python runtime detection
 app = fastapi_app
 handler = fastapi_app
 application = fastapi_app
